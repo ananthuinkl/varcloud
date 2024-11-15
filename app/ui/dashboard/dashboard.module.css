@@ -1,0 +1,32 @@
+.container {
+  display: grid;
+  grid-template-rows: auto 1fr; /* Auto for Navbar, 1fr for Sidebar and children */
+  grid-template-columns: auto 1fr; /* Auto for Sidebar, 1fr for children */
+  height: 100vh; /* Adjust height as needed */
+  overflow: auto; /* Enable scrolling within the container if content exceeds viewport */
+}
+
+.menu {
+  grid-row: 1 / 2; /* Navbar occupies first row */
+  grid-column: 1 / 3; /* Navbar spans both columns */
+  position: fixed; /* Fix Navbar at the top of the viewport */
+  width: 100%; /* Ensure Navbar spans the full width of the viewport */
+  z-index: 1000; /* Adjust z-index as needed to ensure Navbar is above other content */
+  background-color: #fff; /* Optional: Add a background color */
+}
+
+.sidebar {
+  grid-row: 2 / 3; /* Sidebar occupies second row */
+  grid-column: 1 / 2; /* Sidebar occupies first column */
+  /* Adjust width based on your sidebar requirements */
+  width: 250px; /* Example width for Sidebar */
+  margin-top: 50px; /* Adjust margin-top to create space below fixed Navbar */
+}
+
+.children {
+  grid-row: 2 / 3; /* Children occupy second row */
+  grid-column: 2 / 3; /* Children occupy second column */
+  /* Children will automatically take up remaining space */
+  padding-left: 20px; /* Adjust padding-left to create gap with Sidebar */
+  padding-top: 100px
+}
