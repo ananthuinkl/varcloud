@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.varcloud.online
+
+# Sitemaps
+Sitemap: https://www.varcloud.online/sitemap.xml
