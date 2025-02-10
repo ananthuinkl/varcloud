@@ -205,7 +205,7 @@ const VoltageDropCalc = () => {
             newQty = Math.ceil(percentageVd);
             break;
           case 14:
-            newQty = Math.ceil(percentageVd * operVoltage);
+            newQty = Math.ceil(percentageVd * operVoltage/100);
             break;
           case 15:
             newQty = Math.ceil(powerFactor);

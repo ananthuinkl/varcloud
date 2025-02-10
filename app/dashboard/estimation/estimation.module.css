@@ -1,0 +1,18 @@
+.container {
+    padding-top: 10px;
+    display: grid;
+    grid-template-columns: 50% auto;
+    height: 100vh;
+}
+
+.larea {
+    background-color: white;
+    margin-right: 2px;
+    height: 100vh;
+}
+
+.rarea {
+    display: grid;
+    grid-template-rows: 40% auto;
+    height: 100vh;
+}

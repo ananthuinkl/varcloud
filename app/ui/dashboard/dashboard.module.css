@@ -3,7 +3,7 @@
   grid-template-rows: auto 1fr; /* Auto for Navbar, 1fr for Sidebar and children */
   grid-template-columns: auto 1fr; /* Auto for Sidebar, 1fr for children */
   height: 100vh; /* Adjust height as needed */
-  overflow: auto; /* Enable scrolling within the container if content exceeds viewport */
+  overflow: hidden; /* Enable scrolling within the container if content exceeds viewport */
 }
 
 .menu {
@@ -29,4 +29,17 @@
   /* Children will automatically take up remaining space */
   padding-left: 0px; /* Adjust padding-left to create gap with Sidebar */
   padding-top: 40px
+}
+
+.children::-webkit-scrollbar {
+  width: 5px; /* Adjust scrollbar width */
+}
+
+.children::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.5); /* Scrollbar color */
+  border-radius: 10px; /* Rounded scrollbar */
+}
+
+.children::-webkit-scrollbar-track {
+  background-color: transparent; /* Track background */
 }
