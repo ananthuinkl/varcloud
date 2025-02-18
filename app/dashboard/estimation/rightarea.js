@@ -38,15 +38,40 @@ const Restpaget = () => {
       alert("Table data copied to clipboard!");
     });
   };
+  const handleDownload = async () => {
+    const appsScriptUrl = "https://script.google.com/macros/s/AKfycbxntaikfRo2DE_kfgk52TaDFocCW5X_XqRucEwO_nCVwiK6uA8fznzC5ti4c-mkJq4V/exec";
 
+    try {
+      // Fetch the download link from Apps Script
+      const response = await fetch(appsScriptUrl);
+      const downloadUrl = await response.text();
+
+      // Trigger file download
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = "google-sheet.xlsx"; // Set filename
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  };
   return (
     <Box sx={{ fontFamily: "Arial, sans-serif", margin: 1 }}>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
-        <Button variant="contained" color="primary" onClick={handleCopy}>
-          Copy Table Data
-        </Button>
-      </Box>
-
+    <Box sx={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={handleDownload}
+        sx={{ marginRight: "10px" }}
+      >
+        Download BOQ
+      </Button>
+      <Button variant="contained" color="primary" onClick={handleCopy}>
+        Copy Table Data
+      </Button>
+    </Box>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
