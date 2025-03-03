@@ -90,7 +90,11 @@ const Lestpage = () => {
                 <Button type="submit" variant="contained" color="primary">Update</Button>
             </form>
 
-            <TableContainer component={Paper} sx={{ maxHeight: 450, overflowY: "auto" }}>
+            <TableContainer component={Paper} sx={{ maxHeight: 500, overflowY: "auto",
+                      '&::-webkit-scrollbar': { width: '8px' },
+                      '&::-webkit-scrollbar-thumb': { backgroundColor: '#888', borderRadius: '10px' },
+                      '&::-webkit-scrollbar-thumb:hover': { backgroundColor: '#555' },
+                      '&::-webkit-scrollbar-track': { background: '#f1f1f1', borderRadius: '10px' } }}>
                 <Table stickyHeader>
                     <TableHead>
                         <TableRow>

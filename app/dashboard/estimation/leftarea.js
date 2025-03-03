@@ -151,17 +151,16 @@ const Lestpage = () => {
         { id: 69, name: "Conduit Length from Server/Tray to Nearest Data Point-HL", key: "conduitLengthToNearestHighLevelDataPoint", unit: "m" },
         { id: 70, name: "Conduit Length from Server/Tray to Far Data Point-HL", key: "conduitLengthToFarHighLevelDataPoint", unit: "m" },
         { id: 1008, name: "BMS Point Input", key: "bmsPointInput", unit: "" },
-        { id: 71, name: "Total Number Of BMS Point", key: "totalBmsPoints", unit: "No's" },
-        { id: 72, name: "Conduit Length from Server/Tray to Nearest BMS Point", key: "conduitLengthToNearestBmsPoint", unit: "m" },
-        { id: 73, name: "Conduit Length from Server/Tray to Far BMS Point", key: "conduitLengthToFarBmsPoint", unit: "m" },
-        { id: 74, name: "Cable Length from Server/Tray to Nearest BMS Point", key: "cableLengthToNearestBmsPoint", unit: "m" },
-        { id: 75, name: "Cable Length from Server/Tray to Far BMS Point", key: "cableLengthToFarBmsPoint", unit: "m" },
+        { id: 71, name: "Conduit Length from Server/Tray to Nearest BMS Point", key: "conduitLengthToNearestBmsPoint", unit: "m" },
+        { id: 72, name: "Conduit Length from Server/Tray to Far BMS Point", key: "conduitLengthToFarBmsPoint", unit: "m" },
+        { id: 73, name: "Cable Length from Server/Tray to Nearest BMS Point", key: "cableLengthToNearestBmsPoint", unit: "m" },
+        { id: 74, name: "Cable Length from Server/Tray to Far BMS Point", key: "cableLengthToFarBmsPoint", unit: "m" },
         { id: 1009, name: "Thermostat Point Input", key: "thermostatPointInput", unit: "" },
-        { id: 76, name: "Conduit Length from AC Machine to Average Thermostat", key: "conduitLengthToAverageThermostat", unit: "m" },
-        { id: 77, name: "Wire Length from AC Machine to Nearest Thermostat", key: "wireLengthToNearestThermostat", unit: "m" },
-        { id: 78, name: "Wire Length from AC Machine to Far Thermostat", key: "wireLengthToFarThermostat", unit: "m" },
-        { id: 79, name: "Closed Ceiling CFM", key: "closedCeilingCFM", unit: "CFM" },
-        { id: 80, name: "Open Ceiling CFM", key: "openCeilingCFM", unit: "CFM" }
+        { id: 75, name: "Conduit Length from AC Machine to Average Thermostat", key: "conduitLengthToAverageThermostat", unit: "m" },
+        { id: 76, name: "Wire Length from AC Machine to Nearest Thermostat", key: "wireLengthToNearestThermostat", unit: "m" },
+        { id: 77, name: "Wire Length from AC Machine to Far Thermostat", key: "wireLengthToFarThermostat", unit: "m" },
+        { id: 78, name: "Closed Ceiling CFM", key: "closedCeilingCFM", unit: "CFM" },
+        { id: 79, name: "Open Ceiling CFM", key: "openCeilingCFM", unit: "CFM" }
     ];
 
     return (

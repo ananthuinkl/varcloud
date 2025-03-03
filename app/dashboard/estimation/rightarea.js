@@ -31,7 +31,7 @@ const Restpaget = () => {
       )
       .join("\n");
 
-    const headers = "Sl No\tDescription\tQuantity\tUnit";
+    const headers = "Sl No\tDescription\tQuantity\tUnit\tRate\tAmount";
     const finalData = `${headers}\n${tableData}`;
 
     navigator.clipboard.writeText(finalData).then(() => {
