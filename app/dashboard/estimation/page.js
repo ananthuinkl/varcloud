@@ -1,160 +1,164 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../../firebase"; // Adjust the import path based on where your firebase.js file is located
-import {
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Button,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from "@mui/material";
 
-const Restpageb = () => {
+const Lestpage = () => {
   const router = useRouter();
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        router.push("/login"); // Redirect to login if not authenticated
-      } else {
-        setUser(user);
+    const [user, setUser] = useState(null);
+  
+    useEffect(() => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          router.push("/login"); // Redirect to login if not authenticated
+        } else {
+          setUser(user);
+        }
+      });
+  
+      return () => unsubscribe();
+    }, [router]);
+  
+    // Handle logout
+    const handleLogout = async () => {
+      try {
+        await signOut(auth); // Firebase logout
+        router.push("/login"); // Redirect to login after logout
+      } catch (error) {
+        console.error("Error logging out: ", error);
       }
-    });
+    };
+    const [rows, setRows] = useState([]);
+    const [inputValues, setInputValues] = useState({});
 
-    return () => unsubscribe();
-  }, [router]);
+    // Fetch data from the API
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch('/api/api02/getSheetData');
+                const data = await response.json();
+                setRows(data);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+        fetchData();
+    }, []);
 
-  // Handle logout
-  const handleLogout = async () => {
-    try {
-      await signOut(auth); // Firebase logout
-      router.push("/login"); // Redirect to login after logout
-    } catch (error) {
-      console.error("Error logging out: ", error);
-    }
-  };
+    // Handle input change for I/P Quantity
+    const handleInputChange = (e, cellAddress) => {
+        const { value } = e.target;
+        setInputValues(prev => ({ ...prev, [cellAddress]: value }));
+    };
 
-  const [rightRows, setRightRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+    // Handle form submission to update data
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const updatedData = rows.map(row => ({
+            cellAddress: row.cellAddress, 
+            inputQuantity: inputValues[row.cellAddress] !== undefined ? inputValues[row.cellAddress] : row.inputQuantity
+        }));
 
-  // Function to fetch data from Google Apps Script
-  const fetchData = async () => {
-    try {
-      const response = await fetch("https://script.google.com/macros/s/AKfycbxiXrcq9lBHbHbYd4McnJd2tPbiHSdIAUSMF9iENDpILET_eafNxuWd0aRJxFq1w0Eq/exec");
-      const data = await response.json();
-      setRightRows(data);
-    } catch (err) {
-      setError("Failed to fetch data");
-    } finally {
-      setLoading(false);
-    }
-  };
+        try {
+            const response = await fetch('/api/api02/updateSheet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedData)
+            });
 
-  // Fetch data on page load
-  useEffect(() => {
-    fetchData();
-  }, []);
+            const result = await response.json();
+            if (response.ok) {
+                alert(result.message);
+                window.location.reload();
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error("Error updating data:", error);
+        }
+    };
 
-  // Function to copy right table data to clipboard
-  const handleCopy = () => {
-    if (rightRows.length === 0) {
-      alert("No data to copy!");
-      return;
-    }
+    // Helper function to check if Sl No is a number
+    const isNumber = (value) => !isNaN(value) && value !== '';
 
-    const tableData = rightRows
-      .map(
-        (row) =>
-          `${row.id}\t${row.category}\t${row.item}\t${row.qty}\t${row.unit}\t${row.rate}\t${row.amount}`
-      )
-      .join("\n");
+    return (
+        <Box sx={{ fontFamily: "Arial, sans-serif", margin: 1, height: "100vh", paddingTop: "0px" }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+                <Button type="submit" variant="contained" color="primary">Update</Button>
+            </form>
 
-    // Add column headers
-    const headers = "Sl No\tCategory\tItem\tQuantity\tUnit\tRate\tAmount";
-    const finalData = `${headers}\n${tableData}`;
-
-    navigator.clipboard.writeText(finalData).then(() => {
-      alert("Table data copied to clipboard!");
-    });
-  };
-
-  return (
-    <Box sx={{ fontFamily: "Arial, sans-serif", margin: 1, marginBottom: "50px" }}>
-      {/* Copy Button */}
-      <Box sx={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
-        <Button variant="contained" color="primary" onClick={handleCopy}>
-          Copy Table Data
-        </Button>
-      </Box>
-
-      {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: 300 }}>
-          <CircularProgress />
+            <TableContainer component={Paper} sx={{ maxHeight: 450, overflowY: "auto" }}>
+                <Table stickyHeader>
+                    <TableHead>
+                        <TableRow>
+                            {["Sl No", "Description", "I/P Quantity", "A/G Quantity", "Unit"].map((label, index) => (
+                                <TableCell
+                                    key={index}
+                                    sx={{
+                                        backgroundColor: "#4CAF50",
+                                        color: "white",
+                                        fontWeight: "bold",
+                                        py: 0.5,
+                                        textAlign: "center",
+                                    }}
+                                >
+                                    {label}
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {rows.map((row, index) => (
+                            <TableRow key={index}>
+                                <TableCell
+                                    sx={{ 
+                                        py: 0.5, 
+                                        textAlign: "center", 
+                                        fontSize: "0.8rem",
+                                        fontWeight: isNumber(row.slNo) ? 'normal' : 'bold',
+                                    }}
+                                >
+                                    {row.slNo}
+                                </TableCell>
+                                <TableCell
+                                    sx={{ 
+                                      py: 0.5, 
+                                      textAlign: "left", 
+                                      fontSize: "0.8rem",
+                                      fontWeight: isNumber(row.slNo) ? 'normal' : 'bold',
+                                      textDecoration: isNumber(row.slNo) ? 'none' : 'underline'
+                                  }}
+                                >
+                                    {row.description}
+                                </TableCell>
+                                {isNumber(row.slNo) ? (
+                                    <>
+                                        <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.8rem" }}>
+                                            <input 
+                                                type="text" 
+                                                value={inputValues[row.cellAddress] !== undefined ? inputValues[row.cellAddress] : row.inputQuantity} 
+                                                onChange={(e) => handleInputChange(e, row.cellAddress)} 
+                                                style={{ padding: '2px', width: '100px', textAlign: "center" }} 
+                                            />
+                                        </TableCell>
+                                        <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.8rem" }}>{Number(row.agQuantity).toFixed(0)}</TableCell>
+                                        <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.8rem" }}>{row.unit}</TableCell>
+                                    </>
+                                ) : (
+                                    <>
+                                        <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.8rem" }} colSpan={3}></TableCell>
+                                    </>
+                                )}
+                            </TableRow>
+                        ))}
+                    </TableBody> 
+                </Table>
+            </TableContainer>
         </Box>
-      ) : error ? (
-        <Box sx={{ textAlign: "center", color: "red" }}>{error}</Box>
-      ) : (
-        <TableContainer component={Paper} sx={{ maxHeight: 450, overflowY: "auto",
-          '&::-webkit-scrollbar': { width: '8px' },
-          '&::-webkit-scrollbar-thumb': { backgroundColor: '#888', borderRadius: '10px' },
-          '&::-webkit-scrollbar-thumb:hover': { backgroundColor: '#555' },
-          '&::-webkit-scrollbar-track': { background: '#f1f1f1', borderRadius: '10px' } }}>
-          <Table stickyHeader>
-          <TableHead>
-           <TableRow>
-            {[
-              { label: "Sl No", width: "80px" },
-              { label: "Category", width: "150px" },
-              { label: "Item", width: "auto" }, // Remaining width
-              { label: "Quantity", width: "90px" },
-              { label: "Unit", width: "80px" },
-              { label: "Rate", width: "80px" },
-              { label: "Amount", width: "100px" },
-             ].map((header) => (
-              <TableCell
-               key={header.label}
-               sx={{
-                 backgroundColor: "#4CAF50",
-                 color: "white",
-                 fontWeight: "bold",
-                 py: 0.5,
-                 textAlign: "center",
-                 width: header.width,
-                }}
-               >
-             {header.label}
-              </TableCell>
-             ))}
-           </TableRow>
-          </TableHead>
-            <TableBody>
-              {rightRows.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.7rem"}}>{item.id}</TableCell>
-                  <TableCell sx={{ py: 0.5, fontSize: "0.7rem",maxWidth: "40px",  wordWrap: "break-word", overflowWrap: "break-word", whiteSpace: "normal"  }}>{item.category}</TableCell>
-                  <TableCell sx={{ py: 0.5, fontSize: "0.7rem",maxWidth: "150px",  wordWrap: "break-word", overflowWrap: "break-word", whiteSpace: "normal" }}>{item.item}</TableCell>
-                  <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.7rem" }}>{Number(item.qty).toFixed(0)}</TableCell>
-                  <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.7rem" }}>{item.unit}</TableCell>
-                  <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.7rem" }}>{Number(item.rate).toFixed(2)}</TableCell>
-                  <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.7rem" }}>{Number(item.amount).toFixed(2)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
-    </Box>
-  );
+    );
 };
 
-export default Restpageb;
+export default Lestpage;

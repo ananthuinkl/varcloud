@@ -4,7 +4,7 @@ export async function POST(request) {
     try {
         const data = await request.json();
 
-        const response = await fetch("https://script.google.com/macros/s/AKfycbykLBg4D5ITAFB4S6AHeKiOlikIAOzMkjKU-nBYQLvlwdLTrpkEJ3gHrv1-V7jdAZO-/exec", {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbzKBJY3hRENQaa625m3MYUSNSFZ__KEbppYTg5veNmBATZ7ztNX7rBtw1JzhiUL0l0D/exec", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

@@ -29,7 +29,7 @@ const Lestpage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('/api/getSheetData');
+                const response = await fetch('/api/api01/getSheetData');
                 const data = await response.json();
                 setOQuantities(data);
             } catch (error) {
@@ -57,7 +57,7 @@ const Lestpage = () => {
             return acc;
         }, {});
 
-        const response = await fetch('/api/updateSheet', {
+        const response = await fetch('/api/api01/updateSheet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(finalValues),
