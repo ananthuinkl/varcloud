@@ -1,0 +1,190 @@
+/* app/components/FoundationAnimation/FoundationAnimation.module.css */
+
+/* --- Base Styles (UPDATED background) --- */
+.foundation_root {
+  /* USE the main background variable from globals.css */
+  background-color: var(--geist-background);
+  border-bottom: 1px solid var(--accents-2);
+  min-height: 500px;
+  padding: 80px 16px 80px 16px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: hidden;
+}
+
+/* --- Stack, Illustration, CPU, Connectors, Pulse, Shine, Responsive --- */
+/* ... (Keep all other styles exactly as in the previous 'full code' answer) ... */
+.foundation_main {
+  margin: 0 auto;
+  max-width: 1200px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.stack {
+  display: flex;
+  flex-direction: var(--stack-direction, column);
+  align-items: var(--stack-align, stretch);
+  justify-content: var(--stack-justify, flex-start);
+  flex: var(--stack-flex, initial);
+  gap: var(--stack-gap, 0px);
+  padding: var(--stack-padding, 0px);
+}
+
+.foundation_illustration {
+  position: relative;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.foundation_cpu {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  user-select: none;
+  width: fit-content;
+  padding: 21px 25px;
+  border-radius: var(--geist-marketing-radius);
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(180deg, var(--accents-6) 0, var(--accents-7) 100%);
+  box-shadow: 0 2px 4px rgba(0,0,0,.1), 0 6px 4px -2px rgba(0,0,0,.15), inset 0 -3px 1px -1px rgba(0,0,0,.25);
+  z-index: 10;
+}
+
+.foundation_cpu::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 3px;
+  background: linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.1) 26.56%, rgba(0,0,0,.1) 51.56%, rgba(0,0,0,.1));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.foundation_cpu [data-text] {
+  background: linear-gradient(92.66deg, #919191, #eaeaea 19.79%, #828181 33.33%, #c6c6c6 70.31%, #606060);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 10px rgba(255,255,255,.1), 0 -1px 0 rgba(0,0,0,.1);
+  position: relative;
+  z-index: 1;
+}
+
+.foundation_cpu [data-cpu-shine] {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+}
+
+.foundation_cpu [data-cpu-shine]::after {
+  content: "";
+  background: linear-gradient(90deg, transparent 20%, transparent 40%, rgba(255,255,255,.2) 50%, rgba(255,255,255,.15) 55%, transparent 70%, transparent);
+  z-index: 2;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: scale(2.2) rotate(-30deg);
+  animation: foundation_shine__xOb2E 5s ease infinite;
+  opacity: .6;
+  background-size: 200% auto;
+  mix-blend-mode: plus-lighter;
+}
+
+.foundation_cpu [data-connectors] {
+  --connector-width: 6px;
+  --connector-height: 10px;
+  position: absolute;
+  display: flex;
+  z-index: -1;
+}
+.foundation_cpu [data-connectors][data-side="top"],
+.foundation_cpu [data-connectors][data-side="bottom"] {
+  gap: 18px; left: 50%; transform: translateX(-50%);
+}
+.foundation_cpu [data-connectors][data-side="top"] { top: calc(var(--connector-height) * -1); }
+.foundation_cpu [data-connectors][data-side="bottom"] { bottom: calc(var(--connector-height) * -1); }
+.foundation_cpu [data-connectors][data-side="top"] [data-connector],
+.foundation_cpu [data-connectors][data-side="bottom"] [data-connector] {
+  width: var(--connector-width); height: var(--connector-height); border-radius: 1px 1px 0 0;
+}
+.foundation_cpu [data-connectors][data-side="top"] [data-connector] {
+  background: linear-gradient(180deg, #ffffff, #d9d9d9 33.33%, #ffffff 66.67%, #bcbcbc);
+  box-shadow: 0 -1px 1px rgba(0,0,0,.1);
+}
+.foundation_cpu [data-connectors][data-side="bottom"] [data-connector] {
+  background: linear-gradient(0deg, #ffffff, #d9d9d9 33.33%, #ffffff 66.67%, #bcbcbc);
+  box-shadow: 0 1px 1px rgba(0,0,0,.1);
+  transform: scaleY(-1);
+  border-radius: 1px 1px 0 0;
+}
+.foundation_cpu [data-connectors][data-side="left"],
+.foundation_cpu [data-connectors][data-side="right"] {
+  gap: 14px; flex-direction: column; top: 50%; transform: translateY(-50%);
+}
+.foundation_cpu [data-connectors][data-side="left"] { left: calc(var(--connector-height) * -1); }
+.foundation_cpu [data-connectors][data-side="right"] { right: calc(var(--connector-height) * -1); }
+.foundation_cpu [data-connectors][data-side="left"] [data-connector],
+.foundation_cpu [data-connectors][data-side="right"] [data-connector] {
+  height: var(--connector-width); width: var(--connector-height); border-radius: 1px 0 0 1px;
+}
+.foundation_cpu [data-connectors][data-side="left"] [data-connector] {
+  background: linear-gradient(90deg, #ffffff, #d9d9d9 33.33%, #ffffff 66.67%, #bcbcbc);
+  box-shadow: -1px 0 1px rgba(0,0,0,.1);
+}
+.foundation_cpu [data-connectors][data-side="right"] [data-connector] {
+  background: linear-gradient(-90deg, #ffffff, #d9d9d9 33.33%, #ffffff 66.67%, #bcbcbc);
+  box-shadow: 1px 0 1px rgba(0,0,0,.1);
+  transform: scaleX(-1);
+  border-radius: 1px 0 0 1px;
+}
+
+@keyframes pulseInwardAnimation {
+  from { stroke-dashoffset: 1.1; }
+  to { stroke-dashoffset: -0.1; }
+}
+.animatedPulse {
+  stroke-dasharray: 0.3 0.7;
+  animation-name: pulseInwardAnimation;
+  animation-duration: 3s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  transform-origin: center center;
+  will-change: stroke-dashoffset;
+}
+
+@keyframes foundation_shine__xOb2E {
+  to { background-position: 200%; opacity: 0; }
+}
+
+@media (max-width: 960px) {
+  .foundation_illustration { width: 100%; }
+}
+@media (max-width: 768px) {
+   .foundation_illustration svg { display: none; }
+   .foundation_cpu {
+    font-size: 18px; padding: 15px 20px; position: relative; transform: none;
+    top: auto; left: auto; margin-top: 40px;
+   }
+   .foundation_cpu [data-connectors] { display: none; }
+   .foundation_root { padding: 60px 16px; min-height: auto; align-items: center; }
+   .foundation_illustration { height: auto; width: auto; }
+}

@@ -1,4 +1,169 @@
+/* globals.css */
 :root {
+  /* Your Existing Variables */
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* --- Added Animation Variables (Light Mode) --- */
+  --geist-foreground: var(--foreground);
+  --geist-background: var(--background); /* MAPPED to your background */
+  --geist-accent-bg: #fafafa;
+  --accents-1: #fafafa;
+  --accents-2: #eaeaea;
+  --accents-3: #999999;
+  --accents-4: #888888;
+  --accents-5: #666666;
+  --accents-6: #444444;
+  --accents-7: #333333;
+  --accents-8: #111111;
+  --ds-gray-1000: #111111;
+  --gradient-blue-start: #2EB9DF;
+  --gradient-blue-end: #0196FF;
+  --gradient-pink-start: #FF4A81;
+  --gradient-pink-mid: #DF6CF6;
+  --gradient-pink-end: #9B5DE5;
+  --gradient-orange-start: #FF7432;
+  --gradient-orange-end: #F7CC4B;
+  --geist-radius: 5px;
+  --geist-marketing-radius: 8px;
+  --shadow-small: 0 5px 10px rgba(0,0,0,0.12);
+  --shadow-medium: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Your Existing Dark Variables */
+    --background: #0a0a0a;
+    --foreground: #ededed;
+
+    /* --- Added Animation Variables (Dark Mode) --- */
+    --geist-foreground: var(--foreground);
+    --geist-background: var(--background); /* MAPPED to your background */
+    --geist-accent-bg: #111111;
+    --accents-1: #111111;
+    --accents-2: #333333;
+    --accents-3: #444444;
+    --accents-4: #666666;
+    --accents-5: #888888;
+    --accents-6: #aaaaaa;
+    --accents-7: #777777;
+    --accents-8: #fafafa;
+    --ds-gray-1000: #ffffff;
+    --gradient-blue-start: #2EB9DF;
+    --gradient-blue-end: #0196FF;
+    --gradient-pink-start: #FF4A81;
+    --gradient-pink-mid: #DF6CF6;
+    --gradient-pink-end: #9B5DE5;
+    --gradient-orange-start: #FF7432;
+    --gradient-orange-end: #F7CC4B;
+    --geist-radius: 5px;
+    --geist-marketing-radius: 8px;
+    --shadow-small: 0 5px 10px rgba(0,0,0,0.12);
+    --shadow-medium: 0 8px 30px rgba(0,0,0,0.12);
+  }
+}
+
+/* Your existing styles below */
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+/* --- Added Animation Keyframes --- */
+@keyframes foundation_shine__xOb2E {
+  to {
+    background-position: 200%;
+    opacity: 0;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* :root {
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -39,4 +204,4 @@ a {
   html {
     color-scheme: dark;
   }
-}
+} */

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Box, Typography } from '@mui/material';
+import FoundationAnimation from './components/FoundationAnimation/FoundationAnimation';
 
 export default function Home() {
   return (
@@ -26,7 +27,7 @@ export default function Home() {
             },
           }}
         >
-          VAR Cloud
+          <FoundationAnimation />
         </Typography>
       </Link>
     </Box>
