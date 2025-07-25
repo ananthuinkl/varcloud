@@ -1,16 +1,16 @@
-import Lestpage from "./leftarea";
-import Restpaget from "./rightarea";
+import Leftpage from "./leftarea";
+import Rightpaget from "./rightarea";
 import styles from "./estimation.module.css";
 
 const Layout = ({ children }) => {
   return (
     <div className={styles.container}>
       <div className={styles.larea}>
-        <Lestpage />
+        <Leftpage />
       </div>
       <div className={styles.rarea}>
         <div className={styles.rt}>
-          <Restpaget />
+          <Rightpaget />
         </div>
         <div className={styles.rb}>
           {children}

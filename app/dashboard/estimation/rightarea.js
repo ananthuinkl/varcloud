@@ -13,11 +13,11 @@ import {
   Button,
 } from "@mui/material";
 
-const Restpaget = () => {
+const Rightpaget = () => {
   const [rightRows, setRightRows] = useState([]);
 
   useEffect(() => {
-    fetch("https://script.google.com/macros/s/AKfycbw0m2h5YqeUpQdUIayNyN9kJMjMlmrGq-i-eu_1Qz8Q49lOE4L2MYiKr3lMeJYr7Mhj/exec")
+    fetch("https://script.google.com/macros/s/AKfycbwxCNJdlN_AXNGW79YKNQK1I6lcpCZD0UIfq_dXOlfWPh_BagOJ0wZh0raKIahD79wsSA/exec")
       .then((response) => response.json())
       .then((data) => setRightRows(data))
       .catch((error) => console.error("Error fetching data:", error));
@@ -102,4 +102,4 @@ const Restpaget = () => {
   );
 };
 
-export default Restpaget;
+export default Rightpaget;
