@@ -59,7 +59,8 @@ const Lestpage = () => {
         e.preventDefault();
         const updatedData = rows.map(row => ({
             cellAddress: row.cellAddress, 
-            inputQuantity: inputValues[row.cellAddress] !== undefined ? inputValues[row.cellAddress] : row.inputQuantity
+            // If an input was changed, use that new value. Otherwise, use the existing A/G Quantity.
+            inputQuantity: inputValues[row.cellAddress] !== undefined ? inputValues[row.cellAddress] : row.agQuantity
         }));
 
         try {
@@ -90,7 +91,7 @@ const Lestpage = () => {
                 <Button type="submit" variant="contained" color="primary">Update</Button>
             </form>
 
-            <TableContainer component={Paper} sx={{ maxHeight: 500, overflowY: "auto",
+            <TableContainer component={Paper} sx={{ maxHeight: 565, overflowY: "auto",
                       '&::-webkit-scrollbar': { width: '8px' },
                       '&::-webkit-scrollbar-thumb': { backgroundColor: '#888', borderRadius: '10px' },
                       '&::-webkit-scrollbar-thumb:hover': { backgroundColor: '#555' },
@@ -98,7 +99,8 @@ const Lestpage = () => {
                 <Table stickyHeader>
                     <TableHead>
                         <TableRow>
-                            {["Sl No", "Description", "I/P Quantity", "A/G Quantity", "Unit"].map((label, index) => (
+                            {/* "A/G Quantity" removed from the header array */}
+                            {["Sl No", "Description", "Quantity", "Unit"].map((label, index) => (
                                 <TableCell
                                     key={index}
                                     sx={{
@@ -143,17 +145,19 @@ const Lestpage = () => {
                                         <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.8rem" }}>
                                             <input 
                                                 type="text" 
-                                                value={inputValues[row.cellAddress] !== undefined ? inputValues[row.cellAddress] : row.inputQuantity} 
+                                                // If a value has been typed, show it. Otherwise, default to the A/G Quantity.
+                                                value={inputValues[row.cellAddress] !== undefined ? inputValues[row.cellAddress] : Number(row.agQuantity).toFixed(0)} 
                                                 onChange={(e) => handleInputChange(e, row.cellAddress)} 
                                                 style={{ padding: '2px', width: '100px', textAlign: "center" }} 
                                             />
                                         </TableCell>
-                                        <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.8rem" }}>{Number(row.agQuantity).toFixed(0)}</TableCell>
+                                        {/* TableCell for A/G Quantity has been removed */}
                                         <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.8rem" }}>{row.unit}</TableCell>
                                     </>
                                 ) : (
                                     <>
-                                        <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.8rem" }} colSpan={3}></TableCell>
+                                        {/* colSpan updated from 3 to 2 to account for the removed column */}
+                                        <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.8rem" }} colSpan={2}></TableCell>
                                     </>
                                 )}
                             </TableRow>

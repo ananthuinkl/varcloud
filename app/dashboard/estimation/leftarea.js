@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from "@mui/material";
 
+// ... (all your constants like locations, workTypes, etc. remain unchanged)
 const locations = ["Abu_Dhabi", "Dubai", "Sharjah", "Ajman", "UAQ", "RAK", "Fujairah", "Al_Ain"];
 const workTypes = ["Renovation", "New_Fit-Out"];
 const buildingTypes = ["Low_Class_Office", "Med_Class_Office", "Hig_Class_Office", "Restaurant", "Café", "Ware_House", "Retail_Shop", "Supermarket", "GYM", "Mall", "Villa", "Salon", "Lab", "Hospital"];
@@ -16,12 +17,13 @@ const valvePackageTypes = ["3-Way", "PICV"];
 const acDuctTypes = ["P.I.", "G.I."];
 const giDuctConnectionTypes = ["Gasket", "Cleat"];
 
+
 const Leftpage = () => {
     const [inputValues, setInputValues] = useState({});
     const [oQuantities, setOQuantities] = useState({});
     const inputStyle = {
         padding: '2px',
-        width: '180px',
+        width: '150px',
         textAlign: "center",
         fontSize: "0.75rem"
     };
@@ -50,14 +52,13 @@ const Leftpage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Use the current input value if it exists, otherwise use the fetched quantity or "0"
         const finalValues = Object.keys(oQuantities).reduce((acc, key) => {
             acc[key] = inputValues[key] !== undefined && inputValues[key] !== ""
                 ? inputValues[key]
                 : oQuantities[key] || "0";
             return acc;
         }, {});
-
+        
         const response = await fetch('/api/api01/updateSheet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -67,12 +68,40 @@ const Leftpage = () => {
         const result = await response.json();
         if (response.ok) {
             alert(result.message);
-            window.location.reload();
+            window.location.reload(); // Refreshes page on update
         } else {
             alert('Error: ' + result.message);
         }
     };
+    
+    // *** MODIFIED FUNCTION FOR THE RESET BUTTON ***
+    const handleReset = async () => {
+        if (!confirm("Are you sure you want to reset the data in Sheet 'INPUT02'? This action cannot be undone.")) {
+            return;
+        }
 
+        try {
+            const response = await fetch('/api/api01/resetSheet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'reset' }) 
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert(result.message);
+                // *** ADDED THIS LINE TO REFRESH THE PAGE AFTER RESET ***
+                window.location.reload(); 
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            alert('Reset failed: ' + error.message);
+        }
+    };
+
+
+    // ... (your leftRows array and JSX remain exactly the same)
     const leftRows = [
         { id: 1, name: "Location", key: "location", unit: "" },
         { id: 2, name: "Type of work", key: "workType", unit: "" },
@@ -83,82 +112,84 @@ const Leftpage = () => {
         { id: 7, name: "FLS Scope", key: "flsScope", unit: "" },
         { id: 8, name: "BMS Scope", key: "bmsScope", unit: "" },
         { id: 9, name: "MEP Preliminary", key: "mepPreliminary", unit: "" },
-        { id: 10, name: "Area (Sqm) - Net Closed Ceiling", key: "netClosedCeilingArea", unit: "m²" },
-        { id: 11, name: "Area (Sqm) - Net Open Ceiling", key: "netOpenCeilingArea", unit: "m²" },
-        { id: 12, name: "Slab Height (m)", key: "slabHeight", unit: "m" },
-        { id: 13, name: "Ceiling Height (m)", key: "ceilingHeight", unit: "m" },
-        { id: 14, name: "Void Height (m)", key: "voidHeight", unit: "m" },
-        { id: 15, name: "Floor Type", key: "floorType", unit: "" },
-        { id: 16, name: "Light Control Point", key: "lightControlPoint", unit: "" },
-        { id: 17, name: "Light Control Motion Sensor and Occupancy Sensor", key: "lightControlSensor", unit: "" },
-        { id: 18, name: "Light Control Override Switch", key: "lightControlOverrideSwitch", unit: "" },
-        { id: 19, name: "Type Of Conduits at Closed Ceiling Area", key: "closedCeilingConduitType", unit: "" },
-        { id: 20, name: "Type Of Conduits at Open Ceiling Area", key: "openCeilingConduitType", unit: "" },
-        { id: 21, name: "Floor Box-Percentage of Sharing Work Station", key: "floorBoxSharingPercentage", unit: "%" },
-        { id: 22, name: "Server Room", key: "serverRoom", unit: "" },
-        { id: 23, name: "Type Of Conduits for High Level Data Point", key: "highLevelDataConduitType", unit: "" },
-        { id: 24, name: "Type Of Conduits for 3ph 20A/32A Isolator", key: "isolatorConduitType", unit: "" },
-        { id: 25, name: "Type Of AC unit", key: "acUnitType", unit: "" },
-        { id: 26, name: "VAV Requirement", key: "vav", unit: "" },
-        { id: 27, name: "Type Of Chilled Water Pipe Insulation", key: "chilledWaterPipeInsulationType", unit: "" },
-        { id: 28, name: "Type Of Valve Package", key: "valvePackageType", unit: "" },
-        { id: 29, name: "Type Of AC Duct", key: "acDuctType", unit: "" },
-        { id: 30, name: "Type Of G.I. Duct Insulation", key: "giDuctInsulationType", unit: "" },
-        { id: 31, name: "Type Of G.I. Duct Connection", key: "giDuctConnectionType", unit: "" },
-        { id: 32, name: "Percentage usage of square diffuser", key: "squareDiffuserUsagePercentage", unit: "%" },
-        { id: 1001, name: "Light Point Input", key: "lightPointInput", unit: "" },
-        { id: 33, name: "Number Of Light Points at 1 Circuit", key: "lightPointsPerCircuit", unit: "No's" },
-        { id: 34, name: "Conduit Length from Trunking to First Light Point", key: "conduitLengthToFirstLightPoint", unit: "m" },
-        { id: 35, name: "Wire Length from DB to First Light Point", key: "wireLengthToFirstLightPoint", unit: "m" },
-        { id: 36, name: "Wire Length from DB to Last Light Point", key: "wireLengthToLastLightPoint", unit: "m" },
-        { id: 37, name: "Length between Light Point", key: "lengthBetweenLightPoints", unit: "m" },
-        { id: 1002, name: "Light Control Point Input", key: "lightControlPointInput", unit: "" },
-        { id: 38, name: "Number Of Light Points at 1 Circuit", key: "lightControlPointsPerCircuit", unit: "No's" },
-        { id: 39, name: "Conduit Length from Trunking to First Light Point", key: "conduitLengthToFirstLightControlPoint", unit: "m" },
-        { id: 40, name: "Wire Length from LCP to First Light Point", key: "wireLengthToFirstLightControlPoint", unit: "m" },
-        { id: 41, name: "Wire Length from LCP to Last Light Point", key: "wireLengthToLastLightControlPoint", unit: "m" },
-        { id: 1003, name: "Light Switch Point Input", key: "lightSwitchPointInput", unit: "" },
-        { id: 42, name: "Conduit Length from Trunking to Switch Point", key: "conduitLengthToSwitchPoint", unit: "m" },
-        { id: 43, name: "Wire Length from DB to Switch Point", key: "wireLengthToSwitchPoint", unit: "m" },
-        { id: 1004, name: "Low Level Wiring Device", key: "lowLevelWiringDevice", unit: "" },
-        { id: 44, name: "Conduit Length from Trunking/DB to First Wiring Devices", key: "conduitLengthToFirstWiringDevice", unit: "m" },
-        { id: 45, name: "Wire Length from DB to First Wiring Devices", key: "wireLengthToFirstWiringDevice", unit: "m" },
-        { id: 46, name: "Wire Length from DB to Last Wiring Devices", key: "wireLengthToLastWiringDevice", unit: "m" },
-        { id: 47, name: "Mounting Height of Wiring Devices", key: "wiringDeviceMountingHeight", unit: "m" },
-        { id: 48, name: "Length Between Wiring Devices", key: "lengthBetweenWiringDevices", unit: "m" },
-        { id: 49, name: "Length of flexible conduits required", key: "flexibleConduitLength", unit: "m" },
-        { id: 50, name: "Conduit Length from Trunking/DB to First Floor Box", key: "conduitLengthToFirstFloorBox", unit: "m" },
-        { id: 51, name: "Wire Length from DB to First Floor Box", key: "wireLengthToFirstFloorBox", unit: "m" },
-        { id: 52, name: "Wire Length from DB to Last Floor Box", key: "wireLengthToLastFloorBox", unit: "m" },
-        { id: 53, name: "Length Between Floor Box", key: "lengthBetweenFloorBoxes", unit: "m" },
-        { id: 1005, name: "High Level Wiring Device", key: "highLevelWiringDevice", unit: "" },
-        { id: 54, name: "Conduit Length from Trunking/DB to First Wiring Devices", key: "conduitLengthToFirstHighLevelWiringDevice", unit: "m" },
-        { id: 55, name: "Wire Length from DB to First Wiring Devices", key: "wireLengthToFirstHighLevelWiringDevice", unit: "m" },
-        { id: 56, name: "Wire Length from DB to Last Wiring Devices", key: "wireLengthToLastHighLevelWiringDevice", unit: "m" },
-        { id: 57, name: "Length Between Wiring Devices", key: "lengthBetweenHighLevelWiringDevices", unit: "m" },
-        { id: 1006, name: "Three Phase Power Outlet/Isolator", key: "threePhasePowerOutlet", unit: "" },
-        { id: 58, name: "Conduit Length from Trunking/DB to 3-Phase Power Outlet", key: "conduitLengthToThreePhaseOutlet", unit: "m" },
-        { id: 59, name: "Wire Length from DB to 3-Phase Power Outlet", key: "wireLengthToThreePhaseOutlet", unit: "m" },
-        { id: 1007, name: "Data Point Input", key: "dataPointInput", unit: "" },
-        { id: 60, name: "Conduit Length from Server/Tray to Nearest Data Point- LL", key: "conduitLengthToNearestLowLevelDataPoint", unit: "m" },
-        { id: 61, name: "Conduit Length from Server/Tray to Far Data Point-LL", key: "conduitLengthToFarLowLevelDataPoint", unit: "m" },
-        { id: 62, name: "Conduit Length from Server/Tray to Nearest Data Point-HL", key: "conduitLengthToNearestHighLevelDataPoint", unit: "m" },
-        { id: 63, name: "Conduit Length from Server/Tray to Far Data Point-HL", key: "conduitLengthToFarHighLevelDataPoint", unit: "m" },
-        { id: 1008, name: "BMS Point Input", key: "bmsPointInput", unit: "" },
-        { id: 64, name: "Conduit Length from Server/Tray to Nearest BMS Point", key: "conduitLengthToNearestBmsPoint", unit: "m" },
-        { id: 65, name: "Conduit Length from Server/Tray to Far BMS Point", key: "conduitLengthToFarBmsPoint", unit: "m" },
-        { id: 66, name: "Cable Length from Server/Tray to Nearest BMS Point", key: "cableLengthToNearestBmsPoint", unit: "m" },
-        { id: 67, name: "Cable Length from Server/Tray to Far BMS Point", key: "cableLengthToFarBmsPoint", unit: "m" },
-        { id: 1009, name: "Thermostat Point Input", key: "thermostatPointInput", unit: "" },
-        { id: 68, name: "Conduit Length from AC Machine to Average Thermostat", key: "conduitLengthToAverageThermostat", unit: "m" },
-        { id: 69, name: "Wire Length from AC Machine to Nearest Thermostat", key: "wireLengthToNearestThermostat", unit: "m" },
-        { id: 70, name: "Wire Length from AC Machine to Far Thermostat", key: "wireLengthToFarThermostat", unit: "m" }
+        { id: 10, name: "Area (Sqm) - Net Scope", key: "netArea", unit: "m²" },
+        { id: 11, name: "Area (Sqm) - Net Closed Ceiling", key: "netClosedCeilingArea", unit: "m²" },
+        { id: 12, name: "Area (Sqm) - Net Open Ceiling", key: "netOpenCeilingArea", unit: "m²" },
+        { id: 13, name: "Slab Height (m)", key: "slabHeight", unit: "m" },
+        { id: 14, name: "Ceiling Height (m)", key: "ceilingHeight", unit: "m" },
+        { id: 15, name: "Void Height (m)", key: "voidHeight", unit: "m" },
+        { id: 16, name: "Floor Type", key: "floorType", unit: "" },
+        { id: 17, name: "Light Control Point", key: "lightControlPoint", unit: "" },
+        { id: 18, name: "Light Control Motion Sensor and Occupancy Sensor", key: "lightControlSensor", unit: "" },
+        { id: 19, name: "Light Control Override Switch", key: "lightControlOverrideSwitch", unit: "" },
+        { id: 20, name: "Type Of Conduits at Closed Ceiling Area", key: "closedCeilingConduitType", unit: "" },
+        { id: 21, name: "Type Of Conduits at Open Ceiling Area", "key": "openCeilingConduitType", unit: "" },
+        { id: 22, name: "Floor Box-Percentage of Sharing Work Station", key: "floorBoxSharingPercentage", unit: "%" },
+        { id: 23, name: "Server Room", key: "serverRoom", unit: "" },
+        { id: 24, name: "Type Of Conduits for High Level Data Point", key: "highLevelDataConduitType", unit: "" },
+        { id: 25, name: "Type Of Conduits for 3ph 20A/32A Isolator", key: "isolatorConduitType", unit: "" },
+        { id: 26, name: "Type Of AC unit", key: "acUnitType", unit: "" },
+        { id: 27, name: "VAV Requirement", key: "vav", unit: "" },
+        { id: 28, name: "Type Of Chilled Water Pipe Insulation", key: "chilledWaterPipeInsulationType", unit: "" },
+        { id: 29, "name": "Type Of Valve Package", "key": "valvePackageType", "unit": "" },
+        { id: 30, "name": "Type Of AC Duct", "key": "acDuctType", "unit": "" },
+        { id: 31, "name": "Type Of G.I. Duct Insulation", "key": "giDuctInsulationType", "unit": "" },
+        { id: 32, "name": "Type Of G.I. Duct Connection", "key": "giDuctConnectionType", "unit": "" },
+        { id: 33, "name": "Percentage usage of square diffuser", "key": "squareDiffuserUsagePercentage", "unit": "%" },
+        { id: 1001, "name": "Light Point Input", "key": "lightPointInput", "unit": "" },
+        { id: 34, "name": "Number Of Light Points at 1 Circuit", "key": "lightPointsPerCircuit", "unit": "No's" },
+        { id: 35, "name": "Conduit Length from Trunking to First Light Point", "key": "conduitLengthToFirstLightPoint", "unit": "m" },
+        { id: 36, "name": "Wire Length from DB to First Light Point", "key": "wireLengthToFirstLightPoint", "unit": "m" },
+        { id: 37, "name": "Wire Length from DB to Last Light Point", "key": "wireLengthToLastLightPoint", "unit": "m" },
+        { id: 38, "name": "Length between Light Point", "key": "lengthBetweenLightPoints", "unit": "m" },
+        { id: 1002, "name": "Light Control Point Input", "key": "lightControlPointInput", "unit": "" },
+        { id: 39, "name": "Number Of Light Points at 1 Circuit", "key": "lightControlPointsPerCircuit", "unit": "No's" },
+        { id: 40, "name": "Conduit Length from Trunking to First Light Point", "key": "conduitLengthToFirstLightControlPoint", "unit": "m" },
+        { id: 41, "name": "Wire Length from LCP to First Light Point", "key": "wireLengthToFirstLightControlPoint", "unit": "m" },
+        { id: 42, "name": "Wire Length from LCP to Last Light Point", "key": "wireLengthToLastLightControlPoint", "unit": "m" },
+        { id: 1003, "name": "Light Switch Point Input", "key": "lightSwitchPointInput", "unit": "" },
+        { id: 43, "name": "Conduit Length from Trunking to Switch Point", "key": "conduitLengthToSwitchPoint", "unit": "m" },
+        { id: 44, "name": "Wire Length from DB to Switch Point", "key": "wireLengthToSwitchPoint", "unit": "m" },
+        { id: 1004, "name": "Low Level Wiring Device", "key": "lowLevelWiringDevice", "unit": "" },
+        { id: 45, "name": "Conduit Length from Trunking/DB to First Wiring Devices", "key": "conduitLengthToFirstWiringDevice", "unit": "m" },
+        { id: 46, "name": "Wire Length from DB to First Wiring Devices", "key": "wireLengthToFirstWiringDevice", "unit": "m" },
+        { id: 47, "name": "Wire Length from DB to Last Wiring Devices", "key": "wireLengthToLastWiringDevice", "unit": "m" },
+        { id: 48, "name": "Mounting Height of Wiring Devices", "key": "wiringDeviceMountingHeight", "unit": "m" },
+        { id: 49, "name": "Length Between Wiring Devices", "key": "lengthBetweenWiringDevices", "unit": "m" },
+        { id: 50, "name": "Length of flexible conduits required", "key": "flexibleConduitLength", "unit": "m" },
+        { id: 51, "name": "Conduit Length from Trunking/DB to First Floor Box", "key": "conduitLengthToFirstFloorBox", "unit": "m" },
+        { id: 52, "name": "Wire Length from DB to First Floor Box", "key": "wireLengthToFirstFloorBox", "unit": "m" },
+        { id: 53, "name": "Wire Length from DB to Last Floor Box", "key": "wireLengthToLastFloorBox", "unit": "m" },
+        { id: 54, "name": "Length Between Floor Box", "key": "lengthBetweenFloorBoxes", "unit": "m" },
+        { id: 1005, "name": "High Level Wiring Device", "key": "highLevelWiringDevice", "unit": "" },
+        { id: 55, "name": "Conduit Length from Trunking/DB to First Wiring Devices", "key": "conduitLengthToFirstHighLevelWiringDevice", "unit": "m" },
+        { id: 56, "name": "Wire Length from DB to First Wiring Devices", "key": "wireLengthToFirstHighLevelWiringDevice", "unit": "m" },
+        { id: 57, "name": "Wire Length from DB to Last Wiring Devices", "key": "wireLengthToLastHighLevelWiringDevice", "unit": "m" },
+        { id: 58, "name": "Length Between Wiring Devices", "key": "lengthBetweenHighLevelWiringDevices", "unit": "m" },
+        { id: 1006, "name": "Three Phase Power Outlet/Isolator", "key": "threePhasePowerOutlet", "unit": "" },
+        { id: 59, "name": "Conduit Length from Trunking/DB to 3-Phase Power Outlet", "key": "conduitLengthToThreePhaseOutlet", "unit": "m" },
+        { id: 60, "name": "Wire Length from DB to 3-Phase Power Outlet", "key": "wireLengthToThreePhaseOutlet", "unit": "m" },
+        { id: 1007, "name": "Data Point Input", "key": "dataPointInput", "unit": "" },
+        { id: 61, "name": "Conduit Length from Server/Tray to Nearest Data Point- LL", "key": "conduitLengthToNearestLowLevelDataPoint", "unit": "m" },
+        { id: 62, "name": "Conduit Length from Server/Tray to Far Data Point-LL", "key": "conduitLengthToFarLowLevelDataPoint", "unit": "m" },
+        { id: 63, "name": "Conduit Length from Server/Tray to Nearest Data Point-HL", "key": "conduitLengthToNearestHighLevelDataPoint", "unit": "m" },
+        { id: 64, "name": "Conduit Length from Server/Tray to Far Data Point-HL", "key": "conduitLengthToFarHighLevelDataPoint", "unit": "m" },
+        { id: 1008, "name": "BMS Point Input", "key": "bmsPointInput", "unit": "" },
+        { id: 65, "name": "Conduit Length from Server/Tray to Nearest BMS Point", "key": "conduitLengthToNearestBmsPoint", "unit": "m" },
+        { id: 66, "name": "Conduit Length from Server/Tray to Far BMS Point", "key": "conduitLengthToFarBmsPoint", "unit": "m" },
+        { id: 67, "name": "Cable Length from Server/Tray to Nearest BMS Point", "key": "cableLengthToNearestBmsPoint", "unit": "m" },
+        { id: 68, "name": "Cable Length from Server/Tray to Far BMS Point", "key": "cableLengthToFarBmsPoint", "unit": "m" },
+        { id: 1009, "name": "Thermostat Point Input", "key": "thermostatPointInput", "unit": "" },
+        { id: 69, "name": "Conduit Length from AC Machine to Average Thermostat", "key": "conduitLengthToAverageThermostat", "unit": "m" },
+        { id: 70, "name": "Wire Length from AC Machine to Nearest Thermostat", "key": "wireLengthToNearestThermostat", "unit": "m" },
+        { id: 71, "name": "Wire Length from AC Machine to Far Thermostat", "key": "wireLengthToFarThermostat", "unit": "m" }
     ];
 
     return (
         <Box sx={{ fontFamily: "Arial, sans-serif", margin: 1, height: "100vh", paddingTop: "0px" }}>
             <form onSubmit={handleSubmit} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-                <Button type="submit" variant="contained" color="primary">Update</Button>
+                <Button type="submit" variant="contained" color="primary" sx={{ marginRight: "10px" }}>Update</Button>
+                <Button variant="contained" color="secondary" onClick={handleReset}>Reset</Button>
             </form>
 
             <TableContainer component={Paper} sx={{
@@ -317,7 +348,7 @@ const Leftpage = () => {
                                                         <option key={type} value={type}>{type}</option>
                                                     ))}
                                                 </select>
-                                            ) : item.key === "voidHeight" ? (
+                                            ) : item.key === "voidHeight" || item.key === "netArea" ? (
                                                 <Box
                                                     component="div"
                                                     sx={{

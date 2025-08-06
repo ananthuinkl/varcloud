@@ -13,6 +13,6 @@
 
 .rarea {
     display: grid;
-    grid-template-rows: 35% auto;
+    grid-template-rows: 28% auto;
     height: 100vh;
 }
