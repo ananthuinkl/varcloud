@@ -9,7 +9,7 @@ export async function POST(request) {
 
         // It calls the SAME Apps Script URL as your update function.
         // The Apps Script itself will know what to do based on the 'action'.
-        const response = await fetch("https://script.google.com/macros/s/AKfycbycbAK_gHtJmJiHzKLrJatvhYgW6tJoq9iGEPUc9ZdhGrVqf4gU1Vk78Qng92VSC9gBzQ/exec", { // <-- IMPORTANT: Use your existing Apps Script URL here
+        const response = await fetch("https://script.google.com/macros/s/AKfycbzO7-RrF0cmrO3NxiIgObJIUgaN8-Y21DPH8sfSoVkOxf4CMuJgSH4WQX74XRCf9wnrZw/exec", { // <-- IMPORTANT: Use your existing Apps Script URL here
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

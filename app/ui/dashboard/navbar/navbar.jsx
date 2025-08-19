@@ -88,7 +88,7 @@ export const Navbar = () => {
             endIcon={<KeyboardArrowDownIcon />}
             onClick={(e) => setConstructionAnchorEl(e.currentTarget)} // Directly setting anchor
           >
-            CONSTRUCTION
+            Page 01
           </Button>
 
           <Button
@@ -100,7 +100,7 @@ export const Navbar = () => {
             endIcon={<KeyboardArrowDownIcon />}
             onClick={(e) => setItAnchorEl(e.currentTarget)} // Directly setting anchor
           >
-            IT
+            Page 02
           </Button>
 
           <Button
@@ -112,7 +112,7 @@ export const Navbar = () => {
             endIcon={<KeyboardArrowDownIcon />}
             onClick={(e) => setBusinessAnchorEl(e.currentTarget)} // Directly setting anchor
           >
-            BUSINESS
+            Page 03
           </Button>
 
           <Button
