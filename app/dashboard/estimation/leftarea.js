@@ -182,7 +182,19 @@ const Leftpage = () => {
         { id: 1009, "name": "Thermostat Point Input", "key": "thermostatPointInput", "unit": "" },
         { id: 69, "name": "Conduit Length from AC Machine to Average Thermostat", "key": "conduitLengthToAverageThermostat", "unit": "m" },
         { id: 70, "name": "Wire Length from AC Machine to Nearest Thermostat", "key": "wireLengthToNearestThermostat", "unit": "m" },
-        { id: 71, "name": "Wire Length from AC Machine to Far Thermostat", "key": "wireLengthToFarThermostat", "unit": "m" }
+        { id: 71, "name": "Wire Length from AC Machine to Far Thermostat", "key": "wireLengthToFarThermostat", "unit": "m" },
+        { id: 1010, "name": "Space Details", "key": "spaceDetails", "unit": "" },
+        { id: 72, "name": "Number Of Closed Rooms", "key": "numberOfClosedRooms", "unit": "No's" },
+        { id: 73, "name": "Number Of Work Station", "key": "numberOfWorkstations", "unit": "No's" },
+        { id: 74, "name": "Number Of Toilet Area", "key": "numberOfToiletAreas", "unit": "No's" },
+        { id: 75, "name": "Number Of Wet Pantry Area", "key": "numberOfWetPantryAreas", "unit": "No's" },
+        { id: 76, "name": "Office Area (Sqm)", "key": "officeArea", "unit": "m²" },
+        { id: 77, "name": "Non Working Area (Sqm)", "key": "nonWorkingArea", "unit": "m²" },
+        { id: 78, "name": "Kitchen Area (Sqm)", "key": "kitchenArea", "unit": "m²" },
+        { id: 79, "name": "Dinning Area (Sqm)", "key": "diningArea", "unit": "m²" },
+        { id: 80, "name": "Toilet Area (Sqm)", "key": "toiletArea", "unit": "m²" },
+        { id: 81, "name": "Display Area (Sqm)", "key": "displayArea", "unit": "m²" },
+        { id: 82, "name": "Store Area (Sqm)", "key": "storeArea", "unit": "m²" },
     ];
 
     return (
@@ -210,7 +222,7 @@ const Leftpage = () => {
                     </TableHead>
                     <TableBody>
                         {leftRows.map((item) => {
-                            const isDescriptionOnly = [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009].includes(item.id);
+                            const isDescriptionOnly = [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010].includes(item.id);
 
                             return (
                                 <TableRow key={item.id} sx={{ height: "30px" }}>

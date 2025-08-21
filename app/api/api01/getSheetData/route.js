@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
     try {
-        const response = await fetch("https://script.google.com/macros/s/AKfycbzO7-RrF0cmrO3NxiIgObJIUgaN8-Y21DPH8sfSoVkOxf4CMuJgSH4WQX74XRCf9wnrZw/exec");
+        const response = await fetch("https://script.google.com/macros/s/AKfycbwK2oL2NpDbKjmoPAhPhpBXeCni9rQ34ycKGYZn8GgkJpLCgElW6emYWruEceO-iPj3rg/exec");
         const data = await response.json();
 
         return NextResponse.json(data, { status: 200 });
