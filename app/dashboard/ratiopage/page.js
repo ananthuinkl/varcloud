@@ -202,7 +202,7 @@ const RatioPage = () => {
                         Update Sheet
                     </Button>
                 </Box>
-                <TableContainer component={Paper} sx={{ maxHeight: '120vh' }}>
+                <TableContainer component={Paper} sx={{ maxHeight: '87vh' }}>
                     <Table stickyHeader aria-label="ratio table" sx={{ tableLayout: 'fixed' }}>
                         <TableHead>
                             <TableRow>
