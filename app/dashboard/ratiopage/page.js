@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, CircularProgress, Typography } from "@mui/material";
 
-// --- STYLING CONSTANTS (No changes) ---
+// --- STYLING CONSTANTS ---
 
 const headerCellStyle = {
     backgroundColor: "#2E7D32",
@@ -15,15 +15,16 @@ const headerCellStyle = {
 };
 
 const bodyCellStyle = {
-    height: '30px', 
+    height: '30px',
     verticalAlign: 'middle',
-    fontSize: '0.875rem', 
+    fontSize: '0.875rem',
     padding: '0 10px',
 };
 
+// ---vvv CHANGE IS HERE vvv---
 const editableCellStyle = {
-    padding: 0, 
-    height: '30px', 
+    padding: 0,
+    height: '30px',
     verticalAlign: 'middle',
     fontSize: '0.875rem',
 
@@ -34,12 +35,22 @@ const editableCellStyle = {
         border: 'none',
         outline: 'none',
         backgroundColor: 'transparent',
-        textAlign: 'right', 
-        paddingRight: '8px',  
+        textAlign: 'right',
+        paddingRight: '8px',
         fontFamily: 'inherit',
         fontSize: 'inherit',
         color: 'inherit',
         transition: 'background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+
+        // --- CODE CORRECTED TO USE camelCase ---
+        // For Firefox
+        MozAppearance: 'textfield',
+        // For Chrome, Safari, Edge, Opera
+        '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
+            WebkitAppearance: 'none',
+            margin: 0,
+        },
+        // --- END OF CORRECTION ---
     },
     '&:hover input': { backgroundColor: '#f5f5f5' },
     '& input:focus': {
@@ -47,6 +58,7 @@ const editableCellStyle = {
         boxShadow: 'inset 0 0 0 2px #1976d2',
     },
 };
+// ---^^^ CHANGE IS HERE ^^^---
 
 // --- HELPER FUNCTION FOR FORMATTING (No changes) ---
 const formatToOneDecimal = (value) => {
@@ -56,7 +68,6 @@ const formatToOneDecimal = (value) => {
   }
   return num.toFixed(1);
 };
-
 
 // --- COMPONENT ---
 
@@ -68,7 +79,6 @@ const RatioPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // CHANGE: activeCell now just tracks state, it doesn't drive focus changes
     const [activeCell, setActiveCell] = useState(null);
     const inputRefs = useRef([]);
 
@@ -97,8 +107,6 @@ const RatioPage = () => {
         fetchData();
     }, []);
 
-    // REMOVED: The useEffect for focusing is no longer needed as we do it directly.
-
     // --- EVENT HANDLERS ---
 
     const handleInputChange = (e, rowNumber, header) => {
@@ -124,7 +132,7 @@ const RatioPage = () => {
             };
         });
         try {
-            const response = await fetch('/api/ratio-data', {
+            const response = await fetch('/api/api03-ratio', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
@@ -133,7 +141,7 @@ const RatioPage = () => {
             if (result.status === "success") {
                 alert(result.message);
                 setEditedData({});
-                window.location.reload(); 
+                window.location.reload();
             } else {
                 throw new Error(result.message || 'An unknown error occurred.');
             }
@@ -142,8 +150,7 @@ const RatioPage = () => {
             alert('Error: ' + error.message);
         }
     };
-    
-    // CHANGE: This function now directly manipulates the DOM for instant focus change.
+
     const handleKeyDown = (e, rowIndex, colIndex) => {
         if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
             return;
@@ -181,7 +188,6 @@ const RatioPage = () => {
             nextInput.select(); // Also select the content for easy editing
         }
     };
-
 
     // --- RENDER LOGIC ---
 
@@ -232,7 +238,6 @@ const RatioPage = () => {
                                                         : formatToOneDecimal(row.values[header])
                                                 }
                                                 onChange={(e) => handleInputChange(e, row.rowNumber, header)}
-                                                // CHANGE: onFocus now just syncs the state. The real work is in onKeyDown.
                                                 onFocus={() => setActiveCell({ row: rowIndex, col: colIndex })}
                                                 onKeyDown={(e) => handleKeyDown(e, rowIndex, colIndex)}
                                             />
@@ -249,3 +254,4 @@ const RatioPage = () => {
 };
 
 export default RatioPage;
+
