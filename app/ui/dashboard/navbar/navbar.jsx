@@ -207,6 +207,7 @@ export const Navbar = () => {
           <MenuItem onClick={() => navigateTo("/dashboard/estimation")}>Estimation</MenuItem>
           <MenuItem onClick={() => navigateTo("/dashboard/ratiopage")}>Ratio</MenuItem>
           <MenuItem onClick={() => navigateTo("/dashboard/materiallist")}>Materials</MenuItem>
+          <MenuItem onClick={() => navigateTo("/dashboard/labourunitrate")}>Labour</MenuItem>
           <MenuItem onClick={() => navigateTo("/dashboard/protected")}>Calc</MenuItem>
           <MenuItem onClick={handleClose}>List</MenuItem>
         </Menu>
