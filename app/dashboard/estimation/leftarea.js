@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from "@mui/material";
+import React, { useState, useEffect, useRef, useMemo } from 'react'; // --- NAVIGATION --- Import useRef and useMemo
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, TablePagination } from "@mui/material";
 
 // ... (all your constants like locations, workTypes, etc. remain unchanged)
 const locations = ["Abu_Dhabi", "Dubai", "Sharjah", "Ajman", "UAQ", "RAK", "Fujairah", "Al_Ain"];
@@ -21,6 +21,12 @@ const giDuctConnectionTypes = ["Gasket", "Cleat"];
 const Leftpage = () => {
     const [inputValues, setInputValues] = useState({});
     const [oQuantities, setOQuantities] = useState({});
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(24);
+
+    // --- NAVIGATION --- 1. Create a ref to hold a map of all our input element references
+    const inputRefs = useRef({});
+
     const inputStyle = {
         padding: '2px',
         width: '150px',
@@ -41,6 +47,16 @@ const Leftpage = () => {
         fetchData();
     }, []);
 
+    // ... (Your existing handlers: handleChangePage, handleChangeRowsPerPage, handleInputChange, handleSubmit, handleReset remain the same)
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
     const handleInputChange = (e, key) => {
         const { value } = e.target;
         setInputValues(prev => ({
@@ -51,46 +67,39 @@ const Leftpage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         const finalValues = Object.keys(oQuantities).reduce((acc, key) => {
             acc[key] = inputValues[key] !== undefined && inputValues[key] !== ""
                 ? inputValues[key]
                 : oQuantities[key] || "0";
             return acc;
         }, {});
-        
         const response = await fetch('/api/api01/updateSheet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(finalValues),
         });
-
         const result = await response.json();
         if (response.ok) {
             alert(result.message);
-            window.location.reload(); // Refreshes page on update
+            window.location.reload();
         } else {
             alert('Error: ' + result.message);
         }
     };
     
-    // *** MODIFIED FUNCTION FOR THE RESET BUTTON ***
     const handleReset = async () => {
         if (!confirm("Are you sure you want to reset the data in Sheet 'INPUT02'? This action cannot be undone.")) {
             return;
         }
-
         try {
             const response = await fetch('/api/api01/resetSheet', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'reset' }) 
             });
-
             const result = await response.json();
             if (response.ok) {
                 alert(result.message);
-                // *** ADDED THIS LINE TO REFRESH THE PAGE AFTER RESET ***
                 window.location.reload(); 
             } else {
                 throw new Error(result.message);
@@ -99,9 +108,8 @@ const Leftpage = () => {
             alert('Reset failed: ' + error.message);
         }
     };
-
-
-    // ... (your leftRows array and JSX remain exactly the same)
+    
+    // ... (your leftRows array remains exactly the same)
     const leftRows = [
         { id: 1, name: "Location", key: "location", unit: "" },
         { id: 2, name: "Type of work", key: "workType", unit: "" },
@@ -197,6 +205,53 @@ const Leftpage = () => {
         { id: 82, "name": "Store Area (Sqm)", "key": "storeArea", "unit": "m²" },
     ];
 
+    // --- NAVIGATION --- Memoize the visible rows to prevent re-calculation on every render
+    const visibleRows = useMemo(() =>
+        leftRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+        [leftRows, page, rowsPerPage]
+    );
+
+    // --- NAVIGATION --- Memoize the list of focusable rows on the current page
+    const focusableRowsOnPage = useMemo(() =>
+        visibleRows.filter(row => ![1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010].includes(row.id)),
+        [visibleRows]
+    );
+    
+    // --- NAVIGATION --- 2. Create the keydown handler function
+    const handleKeyDown = (e, currentKey) => {
+        // We only care about ArrowDown, ArrowUp, and Enter
+        if (!['ArrowDown', 'ArrowUp', 'Enter'].includes(e.key)) {
+            return;
+        }
+
+        // Prevent default behavior (like page scrolling or form submission on Enter)
+        e.preventDefault();
+
+        // Find the index of the current input within our focusable list
+        const currentIndex = focusableRowsOnPage.findIndex(row => row.key === currentKey);
+
+        if (currentIndex === -1) return; // Should not happen
+
+        let nextIndex;
+
+        if (e.key === 'ArrowDown' || e.key === 'Enter') {
+            nextIndex = currentIndex + 1;
+        } else { // ArrowUp
+            nextIndex = currentIndex - 1;
+        }
+
+        // Check if the next index is within the bounds of our visible, focusable rows
+        if (nextIndex >= 0 && nextIndex < focusableRowsOnPage.length) {
+            const nextItemKey = focusableRowsOnPage[nextIndex].key;
+            const nextInput = inputRefs.current[nextItemKey];
+            
+            // If the next input element exists in our refs, focus it
+            if (nextInput) {
+                nextInput.focus();
+            }
+        }
+    };
+
     return (
         <Box sx={{ fontFamily: "Arial, sans-serif", margin: 1, height: "100vh", paddingTop: "0px" }}>
             <form onSubmit={handleSubmit} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
@@ -204,205 +259,244 @@ const Leftpage = () => {
                 <Button variant="contained" color="secondary" onClick={handleReset}>Reset</Button>
             </form>
 
-            <TableContainer component={Paper} sx={{
-                maxHeight: 830, overflowY: "auto",
-                '&::-webkit-scrollbar': { width: '8px' },
-                '&::-webkit-scrollbar-thumb': { backgroundColor: '#888', borderRadius: '10px' },
-                '&::-webkit-scrollbar-thumb:hover': { backgroundColor: '#555' },
-                '&::-webkit-scrollbar-track': { background: '#f1f1f1', borderRadius: '10px' }
-            }}>
-                <Table stickyHeader>
-                    <TableHead>
-                        <TableRow sx={{ backgroundColor: "#4CAF50", height: "30px", position: "sticky", top: 0, zIndex: 2 }}>
-                            <TableCell sx={{ color: "white", fontWeight: "bold", py: 0.5, width: "70px", textAlign: "center", backgroundColor: "#4CAF50" }}>Sl No</TableCell>
-                            <TableCell sx={{ color: "white", fontWeight: "bold", py: 0.5, width: "auto", textAlign: "center", backgroundColor: "#4CAF50" }}>Description</TableCell>
-                            <TableCell sx={{ color: "white", fontWeight: "bold", py: 0.5, width: "100px", textAlign: "center", backgroundColor: "#4CAF50" }}>Input</TableCell>
-                            <TableCell sx={{ color: "white", fontWeight: "bold", py: 0.5, width: "80px", textAlign: "center", backgroundColor: "#4CAF50" }}>Unit</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {leftRows.map((item) => {
-                            const isDescriptionOnly = [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010].includes(item.id);
+            <Paper>
+                <TableContainer sx={{
+                    maxHeight: 780,
+                    overflowY: "auto",
+                    '&::-webkit-scrollbar': { width: '8px' },
+                    '&::-webkit-scrollbar-thumb': { backgroundColor: '#888', borderRadius: '10px' },
+                    '&::-webkit-scrollbar-thumb:hover': { backgroundColor: '#555' },
+                    '&::-webkit-scrollbar-track': { background: '#f1f1f1', borderRadius: '10px' }
+                }}>
+                    <Table stickyHeader>
+                        <TableHead>
+                            <TableRow sx={{ backgroundColor: "#4CAF50", height: "30px", position: "sticky", top: 0, zIndex: 2 }}>
+                                <TableCell sx={{ color: "white", fontWeight: "bold", py: 0.5, width: "70px", textAlign: "center", backgroundColor: "#4CAF50" }}>Sl No</TableCell>
+                                <TableCell sx={{ color: "white", fontWeight: "bold", py: 0.5, width: "auto", textAlign: "center", backgroundColor: "#4CAF50" }}>Description</TableCell>
+                                <TableCell sx={{ color: "white", fontWeight: "bold", py: 0.5, width: "100px", textAlign: "center", backgroundColor: "#4CAF50" }}>Input</TableCell>
+                                <TableCell sx={{ color: "white", fontWeight: "bold", py: 0.5, width: "80px", textAlign: "center", backgroundColor: "#4CAF50" }}>Unit</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {/* --- NAVIGATION --- Use the memoized 'visibleRows' for mapping */}
+                            {visibleRows.map((item) => {
+                                    const isDescriptionOnly = [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010].includes(item.id);
 
-                            return (
-                                <TableRow key={item.id} sx={{ height: "30px" }}>
-                                    <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.8rem" }}>
-                                        {isDescriptionOnly ? "" : item.id}
-                                    </TableCell>
-                                    <TableCell sx={{ py: 0.5, fontSize: "0.8rem" }}>
-                                        {isDescriptionOnly ? (
-                                            <span style={{ fontWeight: "bold", textDecoration: "underline" }}>
-                                                {item.name}
-                                            </span>
-                                        ) : (
-                                            item.name
-                                        )}
-                                    </TableCell>
-                                    <TableCell sx={{ py: 0.5, textAlign: "center" }}>
-                                        {isDescriptionOnly ? ("")
-                                            : item.key === "location" ? (
-                                                <select
-                                                    value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
-                                                    onChange={(e) => handleInputChange(e, item.key)}
-                                                    style={inputStyle}
-                                                >
-                                                    {locations.map((type) => (
-                                                        <option key={type} value={type}>{type}</option>
-                                                    ))}
-                                                </select>
-                                            ) : item.key === "workType" ? (
-                                                <select
-                                                    value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
-                                                    onChange={(e) => handleInputChange(e, item.key)}
-                                                    style={inputStyle}
-                                                >
-                                                    {workTypes.map((type) => (
-                                                        <option key={type} value={type}>{type}</option>
-                                                    ))}
-                                                </select>
-                                            ) : item.key === "buildingType" ? (
-                                                <select
-                                                    value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
-                                                    onChange={(e) => handleInputChange(e, item.key)}
-                                                    style={inputStyle}
-                                                >
-                                                    {buildingTypes.map((type) => (
-                                                        <option key={type} value={type}>{type}</option>
-                                                    ))}
-                                                </select>
-                                            ) : item.key === "electricalScope" || item.key === "hvacScope" || item.key === "plumbingScope" || item.key === "flsScope" || item.key === "bmsScope" || item.key === "mepPreliminary" ? (
-                                                <select
-                                                    value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
-                                                    onChange={(e) => handleInputChange(e, item.key)}
-                                                    style={inputStyle}
-                                                >
-                                                    {yesornos.map((type) => (
-                                                        <option key={type} value={type}>{type}</option>
-                                                    ))}
-                                                </select>
-                                            ) : item.key === "floorType" ? (
-                                                <select
-                                                    value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
-                                                    onChange={(e) => handleInputChange(e, item.key)}
-                                                    style={inputStyle}
-                                                >
-                                                    {floorTypes.map((type) => (
-                                                        <option key={type} value={type}>{type}</option>
-                                                    ))}
-                                                </select>
-                                            ) : item.key === "lightControlPoint" || item.key === "lightControlSensor" || item.key === "lightControlOverrideSwitch" || item.key === "serverRoom" || item.key === "vav" ? (
-                                                <select
-                                                    value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
-                                                    onChange={(e) => handleInputChange(e, item.key)}
-                                                    style={inputStyle}
-                                                >
-                                                    {needs.map((type) => (
-                                                        <option key={type} value={type}>{type}</option>
-                                                    ))}
-                                                </select>
-                                            ) : item.key === "closedCeilingConduitType" || item.key === "openCeilingConduitType" || item.key === "highLevelDataConduitType" || item.key === "isolatorConduitType" ? (
-                                                <select
-                                                    value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
-                                                    onChange={(e) => handleInputChange(e, item.key)}
-                                                    style={inputStyle}
-                                                >
-                                                    {pvcgis.map((type) => (
-                                                        <option key={type} value={type}>{type}</option>
-                                                    ))}
-                                                </select>
-                                            ) : item.key === "acUnitType" ? (
-                                                <select
-                                                    value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
-                                                    onChange={(e) => handleInputChange(e, item.key)}
-                                                    style={inputStyle}
-                                                >
-                                                    {acUnitTypes.map((type) => (
-                                                        <option key={type} value={type}>{type}</option>
-                                                    ))}
-                                                </select>
-                                            ) : item.key === "chilledWaterPipeInsulationType" || item.key === "giDuctInsulationType" ? (
-                                                <select
-                                                    value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
-                                                    onChange={(e) => handleInputChange(e, item.key)}
-                                                    style={inputStyle}
-                                                >
-                                                    {chilledWaterPipeInsulationTypes.map((type) => (
-                                                        <option key={type} value={type}>{type}</option>
-                                                    ))}
-                                                </select>
-                                            ) : item.key === "valvePackageType" ? (
-                                                <select
-                                                    value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
-                                                    onChange={(e) => handleInputChange(e, item.key)}
-                                                    style={inputStyle}
-                                                >
-                                                    {valvePackageTypes.map((type) => (
-                                                        <option key={type} value={type}>{type}</option>
-                                                    ))}
-                                                </select>
-                                            ) : item.key === "acDuctType" ? (
-                                                <select
-                                                    value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
-                                                    onChange={(e) => handleInputChange(e, item.key)}
-                                                    style={inputStyle}
-                                                >
-                                                    {acDuctTypes.map((type) => (
-                                                        <option key={type} value={type}>{type}</option>
-                                                    ))}
-                                                </select>
-                                            ) : item.key === "giDuctConnectionType" ? (
-                                                <select
-                                                    value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
-                                                    onChange={(e) => handleInputChange(e, item.key)}
-                                                    style={inputStyle}
-                                                >
-                                                    {giDuctConnectionTypes.map((type) => (
-                                                        <option key={type} value={type}>{type}</option>
-                                                    ))}
-                                                </select>
-                                            ) : item.key === "voidHeight" || item.key === "netArea" ? (
-                                                <Box
-                                                    component="div"
-                                                    sx={{
-                                                        ...inputStyle,
-                                                        border: '1px solid #ccc',
-                                                        backgroundColor: '#f0f0f0',
-                                                        display: 'inline-flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        height: '22px', 
-                                                        boxSizing: 'border-box',
-                                                        cursor: 'not-allowed'
-                                                    }}
-                                                >
-                                                    {oQuantities[item.key] && !isNaN(parseFloat(oQuantities[item.key]))
-                                                        ? parseFloat(oQuantities[item.key]).toFixed(2)
-                                                        : "0.00"}
-                                                </Box>
-                                            ) : (
-                                                <input
-                                                    type="text"
-                                                    value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
-                                                    onChange={(e) => handleInputChange(e, item.key)}
-                                                    onBlur={() => {
-                                                        setInputValues(prev => ({
-                                                            ...prev,
-                                                            [item.key]: prev[item.key] === "" ? (oQuantities[item.key] || "0") : prev[item.key]
-                                                        }));
-                                                    }}
-                                                    style={inputStyle}
-                                                />
-                                            )}
-                                    </TableCell>
-                                    <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.8rem" }}>
-                                        {isDescriptionOnly ? "" : item.unit}
-                                    </TableCell>
-                                </TableRow>
-                            );
-                        })}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                                    return (
+                                        <TableRow key={item.id} sx={{ height: "30px" }}>
+                                            <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.8rem" }}>
+                                                {isDescriptionOnly ? "" : item.id}
+                                            </TableCell>
+                                            <TableCell sx={{ py: 0.5, fontSize: "0.8rem" }}>
+                                                {isDescriptionOnly ? (
+                                                    <span style={{ fontWeight: "bold", textDecoration: "underline" }}>
+                                                        {item.name}
+                                                    </span>
+                                                ) : (
+                                                    item.name
+                                                )}
+                                            </TableCell>
+                                            <TableCell sx={{ py: 0.5, textAlign: "center" }}>
+                                                {isDescriptionOnly ? ("")
+                                                    : item.key === "location" ? (
+                                                        <select
+                                                            ref={(el) => (inputRefs.current[item.key] = el)} // --- NAVIGATION --- 3. Add ref
+                                                            onKeyDown={(e) => handleKeyDown(e, item.key)} // --- NAVIGATION --- 4. Add onKeyDown handler
+                                                            value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
+                                                            onChange={(e) => handleInputChange(e, item.key)}
+                                                            style={inputStyle}
+                                                        >
+                                                            {locations.map((type) => (
+                                                                <option key={type} value={type}>{type}</option>
+                                                            ))}
+                                                        </select>
+                                                    ) : item.key === "workType" ? (
+                                                        <select
+                                                            ref={(el) => (inputRefs.current[item.key] = el)}
+                                                            onKeyDown={(e) => handleKeyDown(e, item.key)}
+                                                            value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
+                                                            onChange={(e) => handleInputChange(e, item.key)}
+                                                            style={inputStyle}
+                                                        >
+                                                            {workTypes.map((type) => (
+                                                                <option key={type} value={type}>{type}</option>
+                                                            ))}
+                                                        </select>
+                                                    ) : item.key === "buildingType" ? (
+                                                        <select
+                                                            ref={(el) => (inputRefs.current[item.key] = el)}
+                                                            onKeyDown={(e) => handleKeyDown(e, item.key)}
+                                                            value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
+                                                            onChange={(e) => handleInputChange(e, item.key)}
+                                                            style={inputStyle}
+                                                        >
+                                                            {buildingTypes.map((type) => (
+                                                                <option key={type} value={type}>{type}</option>
+                                                            ))}
+                                                        </select>
+                                                    ) : item.key === "electricalScope" || item.key === "hvacScope" || item.key === "plumbingScope" || item.key === "flsScope" || item.key === "bmsScope" || item.key === "mepPreliminary" ? (
+                                                        <select
+                                                            ref={(el) => (inputRefs.current[item.key] = el)}
+                                                            onKeyDown={(e) => handleKeyDown(e, item.key)}
+                                                            value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
+                                                            onChange={(e) => handleInputChange(e, item.key)}
+                                                            style={inputStyle}
+                                                        >
+                                                            {yesornos.map((type) => (
+                                                                <option key={type} value={type}>{type}</option>
+                                                            ))}
+                                                        </select>
+                                                    ) : item.key === "floorType" ? (
+                                                        <select
+                                                            ref={(el) => (inputRefs.current[item.key] = el)}
+                                                            onKeyDown={(e) => handleKeyDown(e, item.key)}
+                                                            value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
+                                                            onChange={(e) => handleInputChange(e, item.key)}
+                                                            style={inputStyle}
+                                                        >
+                                                            {floorTypes.map((type) => (
+                                                                <option key={type} value={type}>{type}</option>
+                                                            ))}
+                                                        </select>
+                                                    ) : item.key === "lightControlPoint" || item.key === "lightControlSensor" || item.key === "lightControlOverrideSwitch" || item.key === "serverRoom" || item.key === "vav" ? (
+                                                        <select
+                                                            ref={(el) => (inputRefs.current[item.key] = el)}
+                                                            onKeyDown={(e) => handleKeyDown(e, item.key)}
+                                                            value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
+                                                            onChange={(e) => handleInputChange(e, item.key)}
+                                                            style={inputStyle}
+                                                        >
+                                                            {needs.map((type) => (
+                                                                <option key={type} value={type}>{type}</option>
+                                                            ))}
+                                                        </select>
+                                                    ) : item.key === "closedCeilingConduitType" || item.key === "openCeilingConduitType" || item.key === "highLevelDataConduitType" || item.key === "isolatorConduitType" ? (
+                                                        <select
+                                                            ref={(el) => (inputRefs.current[item.key] = el)}
+                                                            onKeyDown={(e) => handleKeyDown(e, item.key)}
+                                                            value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
+                                                            onChange={(e) => handleInputChange(e, item.key)}
+                                                            style={inputStyle}
+                                                        >
+                                                            {pvcgis.map((type) => (
+                                                                <option key={type} value={type}>{type}</option>
+                                                            ))}
+                                                        </select>
+                                                    ) : item.key === "acUnitType" ? (
+                                                        <select
+                                                            ref={(el) => (inputRefs.current[item.key] = el)}
+                                                            onKeyDown={(e) => handleKeyDown(e, item.key)}
+                                                            value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
+                                                            onChange={(e) => handleInputChange(e, item.key)}
+                                                            style={inputStyle}
+                                                        >
+                                                            {acUnitTypes.map((type) => (
+                                                                <option key={type} value={type}>{type}</option>
+                                                            ))}
+                                                        </select>
+                                                    ) : item.key === "chilledWaterPipeInsulationType" || item.key === "giDuctInsulationType" ? (
+                                                        <select
+                                                            ref={(el) => (inputRefs.current[item.key] = el)}
+                                                            onKeyDown={(e) => handleKeyDown(e, item.key)}
+                                                            value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
+                                                            onChange={(e) => handleInputChange(e, item.key)}
+                                                            style={inputStyle}
+                                                        >
+                                                            {chilledWaterPipeInsulationTypes.map((type) => (
+                                                                <option key={type} value={type}>{type}</option>
+                                                            ))}
+                                                        </select>
+                                                    ) : item.key === "valvePackageType" ? (
+                                                        <select
+                                                            ref={(el) => (inputRefs.current[item.key] = el)}
+                                                            onKeyDown={(e) => handleKeyDown(e, item.key)}
+                                                            value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
+                                                            onChange={(e) => handleInputChange(e, item.key)}
+                                                            style={inputStyle}
+                                                        >
+                                                            {valvePackageTypes.map((type) => (
+                                                                <option key={type} value={type}>{type}</option>
+                                                            ))}
+                                                        </select>
+                                                    ) : item.key === "acDuctType" ? (
+                                                        <select
+                                                            ref={(el) => (inputRefs.current[item.key] = el)}
+                                                            onKeyDown={(e) => handleKeyDown(e, item.key)}
+                                                            value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
+                                                            onChange={(e) => handleInputChange(e, item.key)}
+                                                            style={inputStyle}
+                                                        >
+                                                            {acDuctTypes.map((type) => (
+                                                                <option key={type} value={type}>{type}</option>
+                                                            ))}
+                                                        </select>
+                                                    ) : item.key === "giDuctConnectionType" ? (
+                                                        <select
+                                                            ref={(el) => (inputRefs.current[item.key] = el)}
+                                                            onKeyDown={(e) => handleKeyDown(e, item.key)}
+                                                            value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
+                                                            onChange={(e) => handleInputChange(e, item.key)}
+                                                            style={inputStyle}
+                                                        >
+                                                            {giDuctConnectionTypes.map((type) => (
+                                                                <option key={type} value={type}>{type}</option>
+                                                            ))}
+                                                        </select>
+                                                    ) : item.key === "voidHeight" || item.key === "netArea" ? (
+                                                        <Box
+                                                            component="div"
+                                                            sx={{
+                                                                ...inputStyle,
+                                                                border: '1px solid #ccc',
+                                                                backgroundColor: '#f0f0f0',
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                height: '22px', 
+                                                                boxSizing: 'border-box',
+                                                                cursor: 'not-allowed'
+                                                            }}
+                                                        >
+                                                            {oQuantities[item.key] && !isNaN(parseFloat(oQuantities[item.key]))
+                                                                ? parseFloat(oQuantities[item.key]).toFixed(2)
+                                                                : "0.00"}
+                                                        </Box>
+                                                    ) : (
+                                                        <input
+                                                            ref={(el) => (inputRefs.current[item.key] = el)} // --- NAVIGATION --- Add ref
+                                                            onKeyDown={(e) => handleKeyDown(e, item.key)} // --- NAVIGATION --- Add onKeyDown handler
+                                                            type="text"
+                                                            value={inputValues[item.key] !== undefined ? inputValues[item.key] : oQuantities[item.key] || ""}
+                                                            onChange={(e) => handleInputChange(e, item.key)}
+                                                            onBlur={() => {
+                                                                setInputValues(prev => ({
+                                                                    ...prev,
+                                                                    [item.key]: prev[item.key] === "" ? (oQuantities[item.key] || "0") : prev[item.key]
+                                                                }));
+                                                            }}
+                                                            style={inputStyle}
+                                                        />
+                                                    )}
+                                            </TableCell>
+                                            <TableCell sx={{ py: 0.5, textAlign: "center", fontSize: "0.8rem" }}>
+                                                {isDescriptionOnly ? "" : item.unit}
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                <TablePagination
+                    rowsPerPageOptions={[24, 50, 100]}
+                    component="div"
+                    count={leftRows.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+            </Paper>
         </Box>
     );
 };

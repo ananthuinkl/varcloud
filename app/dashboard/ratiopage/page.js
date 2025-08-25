@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, CircularProgress, Typography } from "@mui/material";
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, CircularProgress, Typography, TablePagination } from "@mui/material";
 
 // --- STYLING CONSTANTS ---
 
@@ -12,6 +12,7 @@ const headerCellStyle = {
     textAlign: 'center',
     padding: '8px 4px',
     lineHeight: '1.3',
+    transition: 'background-color 0.2s ease-in-out',
 };
 
 const bodyCellStyle = {
@@ -21,7 +22,6 @@ const bodyCellStyle = {
     padding: '0 10px',
 };
 
-// ---vvv CHANGE IS HERE vvv---
 const editableCellStyle = {
     padding: 0,
     height: '30px',
@@ -42,7 +42,6 @@ const editableCellStyle = {
         color: 'inherit',
         transition: 'background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
 
-        // --- CODE CORRECTED TO USE camelCase ---
         // For Firefox
         MozAppearance: 'textfield',
         // For Chrome, Safari, Edge, Opera
@@ -50,7 +49,6 @@ const editableCellStyle = {
             WebkitAppearance: 'none',
             margin: 0,
         },
-        // --- END OF CORRECTION ---
     },
     '&:hover input': { backgroundColor: '#f5f5f5' },
     '& input:focus': {
@@ -58,7 +56,6 @@ const editableCellStyle = {
         boxShadow: 'inset 0 0 0 2px #1976d2',
     },
 };
-// ---^^^ CHANGE IS HERE ^^^---
 
 // --- HELPER FUNCTION FOR FORMATTING (No changes) ---
 const formatToOneDecimal = (value) => {
@@ -82,6 +79,11 @@ const RatioPage = () => {
     const [activeCell, setActiveCell] = useState(null);
     const inputRefs = useRef([]);
 
+    // ---vvv PAGINATION STATE vvv---
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(50);
+    // ---^^^ PAGINATION STATE ^^^---
+
     // --- DATA FETCHING (No changes except for ref initialization) ---
     useEffect(() => {
         const fetchData = async () => {
@@ -94,7 +96,7 @@ const RatioPage = () => {
                     setRows(data);
                     const dataHeaders = Object.keys(data[0].values);
                     setHeaders(dataHeaders);
-                    // Initialize the refs array based on data dimensions
+                    // Initialize the refs array based on the TOTAL data dimensions
                     inputRefs.current = Array(data.length).fill(0).map(() => Array(dataHeaders.length).fill(0));
                 }
             } catch (err) {
@@ -109,12 +111,27 @@ const RatioPage = () => {
 
     // --- EVENT HANDLERS ---
 
+    // ---vvv PAGINATION HANDLERS vvv---
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0); // Reset to the first page
+    };
+    // ---^^^ PAGINATION HANDLERS ^^^---
+
     const handleInputChange = (e, rowNumber, header) => {
         const { value } = e.target;
         setEditedData(prev => ({
             ...prev,
             [rowNumber]: { ...prev[rowNumber], [header]: value },
         }));
+    };
+
+    const handleBlur = () => {
+        // setActiveCell(null);
     };
 
     const handleSubmit = async (e) => {
@@ -151,16 +168,15 @@ const RatioPage = () => {
         }
     };
 
-    const handleKeyDown = (e, rowIndex, colIndex) => {
+    const handleKeyDown = (e, rowIndex, colIndex, paginatedRowsCount) => {
         if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
             return;
         }
 
-        e.preventDefault(); // Prevent default browser actions like scrolling
+        e.preventDefault();
 
         let nextRow = rowIndex;
         let nextCol = colIndex;
-        const totalRows = rows.length;
         const totalCols = headers.length;
 
         switch (e.key) {
@@ -169,7 +185,7 @@ const RatioPage = () => {
                 break;
             case 'ArrowDown':
             case 'Enter':
-                nextRow = Math.min(totalRows - 1, rowIndex + 1);
+                nextRow = Math.min(paginatedRowsCount - 1, rowIndex + 1);
                 break;
             case 'ArrowLeft':
                 nextCol = Math.max(0, colIndex - 1);
@@ -180,12 +196,14 @@ const RatioPage = () => {
             default:
                 break;
         }
-
-        // Directly access and focus the next input element from our refs
-        const nextInput = inputRefs.current[nextRow]?.[nextCol];
+        
+        // Calculate the absolute index for the refs array
+        const absoluteNextRow = (page * rowsPerPage) + nextRow;
+        
+        const nextInput = inputRefs.current[absoluteNextRow]?.[nextCol];
         if (nextInput) {
             nextInput.focus();
-            nextInput.select(); // Also select the content for easy editing
+            nextInput.select();
         }
     };
 
@@ -193,6 +211,9 @@ const RatioPage = () => {
 
     if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
     if (error) return <Typography color="error" sx={{ textAlign: 'center', mt: 4 }}>Error: {error}</Typography>;
+
+    // Slice the rows for the current page
+    const paginatedRows = rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
     return (
         <Box sx={{ margin: 2 }}>
@@ -202,56 +223,74 @@ const RatioPage = () => {
                         Update Sheet
                     </Button>
                 </Box>
-                <TableContainer component={Paper} sx={{ maxHeight: '87vh' }}>
-                    <Table stickyHeader aria-label="ratio table" sx={{ tableLayout: 'fixed' }}>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell sx={{ ...headerCellStyle, width: '80px' }}>Serial Code</TableCell>
-                                <TableCell sx={{ ...headerCellStyle, width: '200px', textAlign: 'left' }}>Item Name</TableCell>
-                                {headers.map(header => (
-                                    <TableCell key={header} sx={headerCellStyle}>
-                                        {
-                                            header.replace(/_/g, ' ').split(' ').map((word, index) => (
-                                                <React.Fragment key={index}>
-                                                    {index > 0 && <br />}
-                                                    {word}
-                                                </React.Fragment>
-                                            ))
-                                        }
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {rows.map((row, rowIndex) => (
-                                <TableRow key={row.rowNumber} sx={{ '&:hover': { backgroundColor: '#fafafa' } }}>
-                                    <TableCell sx={{ ...bodyCellStyle, textAlign: 'center' }}>{row.serialCode}</TableCell>
-                                    <TableCell sx={{...bodyCellStyle, textAlign: 'left'}}>{row.itemName}</TableCell>
-                                    {headers.map((header, colIndex) => (
-                                        <TableCell key={`${row.rowNumber}-${header}`} sx={editableCellStyle}>
-                                            <input
-                                                ref={el => inputRefs.current[rowIndex][colIndex] = el}
-                                                type="number"
-                                                value={
-                                                    editedData[row.rowNumber]?.[header] !== undefined
-                                                        ? editedData[row.rowNumber][header]
-                                                        : formatToOneDecimal(row.values[header])
-                                                }
-                                                onChange={(e) => handleInputChange(e, row.rowNumber, header)}
-                                                onFocus={() => setActiveCell({ row: rowIndex, col: colIndex })}
-                                                onKeyDown={(e) => handleKeyDown(e, rowIndex, colIndex)}
-                                            />
-                                        </TableCell>
-                                    ))}
+                {/* ---vvv WRAPPER FOR TABLE AND PAGINATION vvv--- */}
+                <Paper>
+                    <TableContainer sx={{ maxHeight: '80vh' }}>
+                        <Table stickyHeader aria-label="ratio table" sx={{ tableLayout: 'fixed' }}>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell sx={{ ...headerCellStyle, width: '80px' }}>Ref</TableCell>
+                                    <TableCell sx={{ ...headerCellStyle, width: '200px', textAlign: 'left' }}>Item Name</TableCell>
+                                    {headers.map((header, colIndex) => {
+                                        const dynamicHeaderStyle = { ...headerCellStyle, textAlign: 'right', paddingRight: '12px' };
+                                        const activeColumnStyle = { backgroundColor: '#4CAF50' };
+                                        const finalStyle = activeCell && activeCell.col === colIndex
+                                            ? { ...dynamicHeaderStyle, ...activeColumnStyle }
+                                            : dynamicHeaderStyle;
+                                        return (
+                                            <TableCell key={header} sx={finalStyle}>
+                                                {header.replace(/_/g, ' ')}
+                                            </TableCell>
+                                        );
+                                    })}
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                            </TableHead>
+                            <TableBody>
+                                {paginatedRows.map((row, rowIndex) => {
+                                    // Calculate the absolute index for the entire dataset
+                                    const absoluteRowIndex = page * rowsPerPage + rowIndex;
+                                    return (
+                                        <TableRow key={row.rowNumber} sx={{ '&:hover': { backgroundColor: '#fafafa' } }}>
+                                            <TableCell sx={{ ...bodyCellStyle, textAlign: 'center' }}>{row.serialCode}</TableCell>
+                                            <TableCell sx={{...bodyCellStyle, textAlign: 'left'}}>{row.itemName}</TableCell>
+                                            {headers.map((header, colIndex) => (
+                                                <TableCell key={`${row.rowNumber}-${header}`} sx={editableCellStyle}>
+                                                    <input
+                                                        ref={el => inputRefs.current[absoluteRowIndex][colIndex] = el}
+                                                        type="number"
+                                                        value={
+                                                            editedData[row.rowNumber]?.[header] !== undefined
+                                                                ? editedData[row.rowNumber][header]
+                                                                : formatToOneDecimal(row.values[header])
+                                                        }
+                                                        onChange={(e) => handleInputChange(e, row.rowNumber, header)}
+                                                        onFocus={() => setActiveCell({ row: rowIndex, col: colIndex })}
+                                                        onBlur={handleBlur}
+                                                        onKeyDown={(e) => handleKeyDown(e, rowIndex, colIndex, paginatedRows.length)}
+                                                    />
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    );
+                                })}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                    {/* ---vvv PAGINATION COMPONENT vvv--- */}
+                    <TablePagination
+                        rowsPerPageOptions={[10, 25, 50, 100]}
+                        component="div"
+                        count={rows.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                    />
+                    {/* ---^^^ PAGINATION COMPONENT ^^^--- */}
+                </Paper>
             </form>
         </Box>
     );
 };
 
 export default RatioPage;
-
