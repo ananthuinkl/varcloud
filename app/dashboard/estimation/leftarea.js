@@ -6,7 +6,7 @@ import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
 // ... (all your constants like locations, workTypes, etc. remain unchanged)
 const locations = ["Abu_Dhabi", "Dubai", "Sharjah", "Ajman", "UAQ", "RAK", "Fujairah", "Al_Ain"];
 const workTypes = ["Renovation", "New_Fit-Out"];
-const buildingTypes = ["Low_Class_Office", "Med_Class_Office", "Hig_Class_Office", "Restaurant", "Café", "Ware_House", "Retail_Shop", "Supermarket", "GYM", "Mall", "Villa", "Salon", "Lab", "Hospital"];
+const buildingTypes = ["L_B-Off", "M_B-Off", "H_B-Off", "Kit_Area", "Din_Area", "Ware_H", "R_Shop", "Sup_Mar", "GYM", "Mall", "Villa", "Salon", "Lab", "Hospital"];
 const yesornos = ["Yes", "No"];
 const floorTypes = ["Raised", "Screed"];
 const needs = ["Need", "No_Need"];
